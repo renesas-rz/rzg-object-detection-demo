@@ -37,7 +37,7 @@ public:
     tfliteWorker(bool tpuEnable, QString modelLocation);
 
 signals:
-    void sendOutputTensor(const QVector<float>&, int);
+    void sendOutputTensor(const QVector<float>&, int, const QImage&);
     void requestImage();
 
 private:

@@ -107,7 +107,7 @@ void tfliteWorker::receiveImage(const QImage& sentImage)
 
     stopTime = std::chrono::high_resolution_clock::now();
     timeElapsed = int(std::chrono::duration_cast<std::chrono::milliseconds>(stopTime - startTime).count());
-    emit sendOutputTensor(outputTensor, timeElapsed);
+    emit sendOutputTensor(outputTensor, timeElapsed, sentImage);
     outputTensor.clear();
 }
 

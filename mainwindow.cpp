@@ -38,8 +38,6 @@ MainWindow::MainWindow(QWidget *parent, QString cameraLocation, QString labelLoc
     QString fileLine;
 
     webcamName = cameraLocation;
-    continuousRunning = false;
-    stopClicked = false;
     ui->setupUi(this);
     this->resize(MAINWINDOW_WIDTH, MAINWINDOW_HEIGHT);
     scene = new QGraphicsScene(this);
@@ -59,7 +57,6 @@ MainWindow::MainWindow(QWidget *parent, QString cameraLocation, QString labelLoc
 
     ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
 
     ui->checkBoxContinuous->setEnabled(false);
     ui->pushButtonWebcam->setEnabled(false);
@@ -94,8 +91,8 @@ MainWindow::MainWindow(QWidget *parent, QString cameraLocation, QString labelLoc
     tfWorker->moveToThread(tfliteThread);
     connect(tfWorker, SIGNAL(requestImage()), this, SLOT(receiveRequest()));
     connect(this, SIGNAL(sendImage(const QImage&)), tfWorker, SLOT(receiveImage(const QImage&)));
-    connect(tfWorker, SIGNAL(sendOutputTensor(const QVector<float>&, int)), \
-            this, SLOT(receiveOutputTensor(const QVector<float>&, int)));
+    connect(tfWorker, SIGNAL(sendOutputTensor(const QVector<float>&, int, const QImage&)), \
+            this, SLOT(receiveOutputTensor(const QVector<float>&, int, const QImage&)));
     connect(this, SIGNAL(sendNumOfInferenceThreads(int)), tfWorker, SLOT(receiveNumOfInferenceThreads(int)));
 
     webcamTimer = new QTimer();
@@ -147,9 +144,7 @@ void MainWindow::on_pushButtonRun_clicked()
     }
 
     QMetaObject::invokeMethod(tfWorker, "process");
-
-    if (ui->checkBoxContinuous->checkState())
-        continuousRunning = true;
+    ui->pushButtonRun->setEnabled(false);
 }
 
 void MainWindow::on_inferenceThreadCount_valueChanged(int threads)
@@ -163,34 +158,32 @@ void MainWindow::receiveRequest()
     tfWorker->moveToThread(tfliteThread);
 }
 
-void MainWindow::receiveOutputTensor(const QVector<float>& receivedTensor, int receivedTimeElapsed)
+void MainWindow::receiveOutputTensor(const QVector<float>& receivedTensor, int receivedTimeElapsed, const QImage& receivedImage)
 {
-    int receivedTime = receivedTimeElapsed;
-
-    if (continuousRunning) {
-        QMetaObject::invokeMethod(tfWorker, "process");
-    } else if (stopClicked) {
-        stopClicked = false;
+    if (ui->pushButtonRun->isEnabled())
         return;
-    }
 
     outputTensor = receivedTensor;
 
-    ui->labelInferenceTime->setText(QString("%1 ms").arg(receivedTime));
+    ui->labelInferenceTime->setText(QString("%1 ms").arg(receivedTimeElapsed));
 
-    scene->clear();
-    image.scaled(ui->graphicsView->width(), ui->graphicsView->height(), Qt::KeepAspectRatio);
-    scene->addPixmap(image);
-    scene->setSceneRect(image.rect());
+    if (!ui->checkBoxContinuous->isChecked()) {
+        ui->pushButtonRun->setEnabled(true);
+    } else {
+        image = QPixmap::fromImage(receivedImage);
+        scene->clear();
+        image.scaled(ui->graphicsView->width(), ui->graphicsView->height(), Qt::KeepAspectRatio);
+        scene->addPixmap(image);
+        scene->setSceneRect(image.rect());
+        QMetaObject::invokeMethod(tfWorker, "process");
+    }
+
     drawBoxes();
 }
 
 void MainWindow::on_pushButtonStop_clicked()
 {
-    if (continuousRunning){
-        continuousRunning = false;
-        stopClicked = true;
-    }
+    ui->pushButtonRun->setEnabled(true);
 }
 
 void MainWindow::on_pushButtonCapture_clicked()
@@ -205,8 +198,6 @@ void MainWindow::on_pushButtonCapture_clicked()
     scene->clear();
     scene->addPixmap(image);
     scene->setSceneRect(image.rect());
-
-    on_pushButtonRun_clicked();
 }
 
 void MainWindow::on_pushButtonWebcam_clicked()
@@ -227,8 +218,10 @@ void MainWindow::showImage(const QImage& imageToShow)
     if ((imageNew.width() != IMAGE_WIDTH || imageNew.height() != IMAGE_HEIGHT) && imageNew.depth() > 0)
         imageNew = imageNew.scaled(IMAGE_WIDTH, IMAGE_HEIGHT);
 
-    if (ui->pushButtonWebcam->isChecked()) {
+    if (ui->pushButtonWebcam->isChecked())
         imageToSend = imageNew;
+
+    if (ui->pushButtonWebcam->isChecked() && !ui->checkBoxContinuous->isChecked()) {
         image = QPixmap::fromImage(imageToSend);
         scene->clear();
         scene->addPixmap(image);
@@ -277,11 +270,6 @@ void MainWindow::pushButtonWebcamCheck(bool webcamButtonChecked)
         ui->checkBoxContinuous->setCheckState(Qt::Unchecked);
         ui->checkBoxContinuous->setEnabled(false);
     }
-}
-
-void MainWindow::on_checkBoxContinuous_stateChanged(int checkBoxState)
-{
-    continuousRunning = checkBoxState;
 }
 
 void MainWindow::webcamInitStatus(bool webcamStatus)
