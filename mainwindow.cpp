@@ -23,6 +23,7 @@
 #include <QThread>
 #include <QEventLoop>
 #include <QTimer>
+#include <QImageReader>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -104,6 +105,7 @@ void MainWindow::on_pushButtonImage_clicked()
     QString fileName;
     QStringList fileNames;
     QFileDialog dialog(this);
+    QString imageFilter;
 
     connect(this, SIGNAL(imageLoaded()), qeventLoop, SLOT(quit()));
 
@@ -111,9 +113,15 @@ void MainWindow::on_pushButtonImage_clicked()
     ui->pushButtonWebcam->setChecked(false);
     outputTensor.clear();
     ui->labelInferenceTime->clear();
-
     dialog.setFileMode(QFileDialog::AnyFile);
-    dialog.setNameFilter(tr("Image Files (*.png *.jpg *.bmp)"));
+
+    imageFilter = "Images (";
+    for (int i = 0; i < QImageReader::supportedImageFormats().count(); i++) {
+        imageFilter += "*." + QImageReader::supportedImageFormats().at(i) + " ";
+    }
+    imageFilter +=")";
+
+    dialog.setNameFilter(imageFilter);
     dialog.setViewMode(QFileDialog::Detail);
 
     if (dialog.exec())
