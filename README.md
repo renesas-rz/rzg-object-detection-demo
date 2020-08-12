@@ -1,14 +1,15 @@
 # RZ/G Object Detection Demo Application Source Code
 
-This repository contains the code required to build the demo application.  
+This repository contains the code required to build the demo application.
 This demo is based upon the [Renesas RZ/G AI BSP](https://github.com/renesas-rz/meta-renesas-ai)
 and requires [TensorFlow Lite](https://github.com/tensorflow/tensorflow/tree/v2.0.0) and [OpenCV](https://opencv.org/).
 
 ## Manual Build Instructions
 ### Target: RZ/G2M (hihope-rzg2m)
-1. Have a suitable cross toolchain by building `bitbake core-image-qt-sdk -c populate_sdk`
+1. Have a suitable cross toolchain by building `bitbake core-image-qt-sdk -c populate_sdk`. This requires adding the line:
+`IMAGE_INSTALL_append = " tensorflow-lite-staticdev tensorflow-lite-dev google-coral-dev google-coral"`
 with the Yocto meta-layers described in [meta-rzg2](https://github.com/renesas-rz/meta-rzg2)
-and [meta-renesas-ai](https://github.com/renesas-rz/meta-renesas-ai) (copy `.conf` files from meta-tensorfow-lite).
+and [meta-renesas-ai](https://github.com/renesas-rz/meta-renesas-ai).
 2. Install cross toolchain with `sudo sh ./poky-glibc-x86_64-core-image-qt-sdk-aarch64-toolchain-2.4.3.sh`.
 3. Set up environment variables with `source /<SDK location>/environment-setup-aarch64-poky-linux`.
 4. Run `qmake`.
