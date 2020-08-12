@@ -34,6 +34,8 @@ and [meta-renesas-ai](https://github.com/renesas-rz/meta-renesas-ai).
     -D WITH_GSTREAMER=ON ..
     make
     make install
+    cd /usr/local/include/opencv4/
+    sudo cp -R opencv2/ ../
     ```
 
 2. Build and install [TensorFlow Lite v2.0.2](https://github.com/tensorflow/tensorflow/tree/v2.0.2).
