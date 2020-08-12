@@ -47,14 +47,23 @@ and [meta-renesas-ai](https://github.com/renesas-rz/meta-renesas-ai).
     sudo cp -r tensorflow/ /usr/local/include
     sudo cp -r tensorflow/lite/tools/make/downloads/flatbuffers/include/flatbuffers/ /usr/local/include
     ```
-3. Run `sudo apt install qt5-default`
-4. Run `sudo apt install qtmultimedia5-dev`
-5. Run `qmake`
-6. Run `make` 
-7. Copy [`coco_labels.txt`](https://github.com/google-coral/edgetpu/blob/master/test_data/coco_labels.txt) to the directory where `object_detection_demo` is located.
-8. Copy [`mobilenet_ssd_v2_coco_quant_postprocess.tflite`](https://github.com/google-coral/edgetpu/blob/diploria2/test_data/mobilenet_ssd_v2_coco_quant_postprocess.tflite)` to the directory where `object_detection_demo` is located.
-9. Copy [`mobilenet_ssd_v2_coco_quant_postprocess_tpu.tflite`](https://github.com/google-coral/edgetpu/blob/diploria2/test_data/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite) to the directory where `object_detection_demo` is located.
-10. Run the app with `./object_detection_demo`.
+3. Install Google Coral
+    ```
+    git clone https://github.com/google-coral/edgetpu.git
+    cd edgetpu
+    git checkout diploria2
+    sudo ./scripts/runtime/install.sh
+    sudo mkdir /usr/include/google-coral-diploria2
+    sudo cp libedgetpu/edgetpu.h /usr/include/google-coral-diploria2
+    ```
+4. Run `sudo apt install qt5-default`
+5. Run `sudo apt install qtmultimedia5-dev`
+6. Run `qmake`
+7. Run `make`
+8. Copy [`coco_labels.txt`](https://github.com/google-coral/edgetpu/blob/master/test_data/coco_labels.txt) to the directory where `object_detection_demo` is located.
+9. Copy [`mobilenet_ssd_v2_coco_quant_postprocess.tflite`](https://github.com/google-coral/edgetpu/blob/diploria2/test_data/mobilenet_ssd_v2_coco_quant_postprocess.tflite)` to the directory where `object_detection_demo` is located.
+10. Copy [`mobilenet_ssd_v2_coco_quant_postprocess_tpu.tflite`](https://github.com/google-coral/edgetpu/blob/diploria2/test_data/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite) to the directory where `object_detection_demo` is located.
+11. Run the app with `./object_detection_demo`.
 
 ## Help
 ```
