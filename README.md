@@ -15,8 +15,8 @@ and [meta-renesas-ai](https://github.com/renesas-rz/meta-renesas-ai) (copy `.con
 5. Run `make`.
 6. Copy `object_detection_demo` to the root filesystem.
 7. Copy [`coco_labels.txt`](https://github.com/google-coral/edgetpu/blob/master/test_data/coco_labels.txt) to the directory where `object_detection_demo` is located.
-8. Copy [`mobilenet_ssd_v2_coco_quant_postprocess.tflite`](https://github.com/google-coral/edgetpu/blob/master/test_data/mobilenet_ssd_v2_coco_quant_postprocess.tflite) to the directory where `object_detection_demo` is located.
-9. Copy [`mobilenet_ssd_v2_coco_quant_postprocess_tpu.tflite`](https://github.com/google-coral/edgetpu/blob/master/test_data/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite) to the directory where `object_detection_demo` is located.
+8. Copy [`mobilenet_ssd_v2_coco_quant_postprocess.tflite`](https://github.com/google-coral/edgetpu/blob/diploria2/test_data/mobilenet_ssd_v2_coco_quant_postprocess.tflite) to the directory where `object_detection_demo` is located.
+9. Copy [`mobilenet_ssd_v2_coco_quant_postprocess_tpu.tflite`](https://github.com/google-coral/edgetpu/blob/diploria2/test_data/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite) to the directory where `object_detection_demo` is located.
 10. Run the app with `./object_detection_demo`.
 
 ### Target: Ubuntu
@@ -51,8 +51,8 @@ and [meta-renesas-ai](https://github.com/renesas-rz/meta-renesas-ai) (copy `.con
 5. Run `qmake`
 6. Run `make` 
 7. Copy [`coco_labels.txt`](https://github.com/google-coral/edgetpu/blob/master/test_data/coco_labels.txt) to the directory where `object_detection_demo` is located.
-8. Copy [`mobilenet_ssd_v2_coco_quant_postprocess.tflite`](https://github.com/google-coral/edgetpu/blob/master/test_data/mobilenet_ssd_v2_coco_quant_postprocess.tflite)` to the directory where `object_detection_demo` is located.
-9. Copy [`mobilenet_ssd_v2_coco_quant_postprocess_tpu.tflite`](https://github.com/google-coral/edgetpu/blob/master/test_data/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite) to the directory where `object_detection_demo` is located.
+8. Copy [`mobilenet_ssd_v2_coco_quant_postprocess.tflite`](https://github.com/google-coral/edgetpu/blob/diploria2/test_data/mobilenet_ssd_v2_coco_quant_postprocess.tflite)` to the directory where `object_detection_demo` is located.
+9. Copy [`mobilenet_ssd_v2_coco_quant_postprocess_tpu.tflite`](https://github.com/google-coral/edgetpu/blob/diploria2/test_data/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite) to the directory where `object_detection_demo` is located.
 10. Run the app with `./object_detection_demo`.
 
 ## Help
