@@ -43,7 +43,7 @@ and [meta-renesas-ai](https://github.com/renesas-rz/meta-renesas-ai).
     git checkout v2.0.0
     ./tensorflow/lite/tools/make/download_dependencies.sh
     ./tensorflow/lite/tools/make/build_lib.sh
-    sudo cp ./tensorflow/lite/tools/make/gen/lib/libtensorflow-lite.a /usr/local/lib/
+    sudo cp ./tensorflow/lite/tools/make/gen/linux_x86_64/lib/libtensorflow-lite.a /usr/local/lib/
     sudo cp -r tensorflow/ /usr/local/include
     sudo cp -r tensorflow/lite/tools/make/downloads/flatbuffers/include/flatbuffers/ /usr/local/include
     ```
