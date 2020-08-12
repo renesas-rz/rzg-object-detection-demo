@@ -2,7 +2,7 @@
 
 This repository contains the code required to build the demo application.
 This demo is based upon the [Renesas RZ/G AI BSP](https://github.com/renesas-rz/meta-renesas-ai)
-and requires [TensorFlow Lite](https://github.com/tensorflow/tensorflow/tree/v2.0.0) and [OpenCV](https://opencv.org/).
+and requires [TensorFlow Lite](https://github.com/tensorflow/tensorflow/tree/v2.0.2) and [OpenCV](https://opencv.org/).
 
 ## Manual Build Instructions
 ### Target: RZ/G2M (hihope-rzg2m)
@@ -36,7 +36,7 @@ and [meta-renesas-ai](https://github.com/renesas-rz/meta-renesas-ai).
     make install
     ```
 
-2. Build and install [TensorFlow Lite v2.0.0](https://github.com/tensorflow/tensorflow/tree/v2.0.0).
+2. Build and install [TensorFlow Lite v2.0.2](https://github.com/tensorflow/tensorflow/tree/v2.0.2).
     ```
     git clone  https://github.com/tensorflow/tensorflow.git
     cd tensorflow/
