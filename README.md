@@ -60,8 +60,7 @@ and [meta-renesas-ai](https://github.com/renesas-rz/meta-renesas-ai).
     ```
 4. Run `sudo apt install qt5-default`
 5. Run `sudo apt install qtmultimedia5-dev`
-6. Run `qmake`
-7. Run `make`
+6. Compilation is then possible with QtCreator.
 8. Copy [`coco_labels.txt`](https://github.com/google-coral/edgetpu/blob/master/test_data/coco_labels.txt) to the directory where `object_detection_demo` is located.
 9. Copy [`mobilenet_ssd_v2_coco_quant_postprocess.tflite`](https://github.com/google-coral/edgetpu/blob/diploria2/test_data/mobilenet_ssd_v2_coco_quant_postprocess.tflite)` to the directory where `object_detection_demo` is located.
 10. Copy [`mobilenet_ssd_v2_coco_quant_postprocess_tpu.tflite`](https://github.com/google-coral/edgetpu/blob/diploria2/test_data/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite) to the directory where `object_detection_demo` is located.
