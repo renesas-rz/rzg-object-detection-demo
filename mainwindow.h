@@ -29,6 +29,7 @@
 #define TEXT_COLOUR Qt::white
 #define X_TEXT_OFFSET 6
 #define Y_TEXT_OFFSET 18
+#define HEIGHT_OFFSET 50      //Leave a small offset space in case labels are outside of image
 #define X_FPS 95              // Place FPS text in top right hand corner
 #define Y_FPS 0
 
@@ -95,6 +96,7 @@ private:
     int fpsToDelay (float fps);
     cv::Mat captureVideoFrame();
     QImage matToQImage(const cv::Mat& matToConvert);
+    cv::Mat resizeKeepAspectRatio(const cv::Mat& matInput);
 
     Ui::MainWindow *ui;
     QPixmap image;

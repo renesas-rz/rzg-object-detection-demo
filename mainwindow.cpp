@@ -480,6 +480,21 @@ void MainWindow::on_videoSlider_sliderReleased()
     drawBoxes();
 }
 
+cv::Mat MainWindow::resizeKeepAspectRatio(const cv::Mat& matInput)
+{
+    cv::Mat matOutput;
+
+    double height = ui->graphicsView->width() * (matInput.rows/(double)matInput.cols);
+    double width = (ui->graphicsView->height() - HEIGHT_OFFSET) * (matInput.cols/(double)matInput.rows);
+
+    if( height <= (ui->graphicsView->height() - HEIGHT_OFFSET)) {
+        cv::resize(matInput, matOutput, cv::Size(ui->graphicsView->width(), height));
+    } else {
+        cv::resize(matInput, matOutput, cv::Size(width, (ui->graphicsView->height() - HEIGHT_OFFSET)));
+    }
+
+    return matOutput;
+}
 
 cv::Mat MainWindow::captureVideoFrame()
 {
@@ -539,10 +554,11 @@ int MainWindow::fpsToDelay(float fps)
 
 void MainWindow::drawMatToView(const cv::Mat& matInput)
 {
-
+    cv::Mat matToDraw;
     QImage imageToDraw;
 
-    imageToDraw = matToQImage(matInput);
+    matToDraw = resizeKeepAspectRatio(matInput);
+    imageToDraw = matToQImage(matToDraw);
 
     image = QPixmap::fromImage(imageToDraw);
     scene->clear();
