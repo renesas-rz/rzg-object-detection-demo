@@ -16,8 +16,6 @@
  * along with the RZG Object Detection Demo.  If not, see <https://www.gnu.org/licenses/>.
  *****************************************************************************************/
 
-#include <QImage>
-
 #include "opencvworker.h"
 
 void opencvWorker::initialiseWebcam(QString cameraLocation)
@@ -47,18 +45,15 @@ void opencvWorker::initialiseWebcam(QString cameraLocation)
 
 void opencvWorker::readFrame()
 {
-    QImage videoImage;
+    cv::Mat videoFrame;
     if(!videoCapture->read(videoFrame)) {
         webcamInitialised = false;
         videoCapture->release();
         emit webcamInit(webcamInitialised);
         return;
     }
-    videoImage = QImage(videoFrame.data, videoFrame.cols, \
-                     videoFrame.rows, int(videoFrame.step), \
-                        QImage::Format_RGB888).rgbSwapped();
-    videoFrame.release();
-    emit sendImage(videoImage);
+
+    emit sendImage(videoFrame);
 }
 
 void opencvWorker::disconnectWebcam()

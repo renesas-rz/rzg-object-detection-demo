@@ -19,7 +19,6 @@
 #ifndef OPENCVCAPTUREWORKER_H
 #define OPENCVCAPTUREWORKER_H
 
-#include <opencv2/core.hpp>
 #include <opencv2/videoio.hpp>
 #include <QObject>
 #include <memory>
@@ -27,19 +26,15 @@
 #define CAMERA_WIDTH "800"
 #define CAMERA_HEIGHT "600"
 
-
-Q_DECLARE_METATYPE(cv::Mat)
-
 class opencvWorker : public QObject
 {
     Q_OBJECT
 
 signals:
-    void sendImage(const QImage&);
+    void sendImage(const cv::Mat&);
     void webcamInit(bool webcamInitialised);
 
 private:
-    cv::Mat videoFrame;
     std::unique_ptr<cv::VideoCapture> videoCapture;
     bool webcamInitialised;
 

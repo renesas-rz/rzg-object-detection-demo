@@ -23,7 +23,9 @@
 #include <QThread>
 #include <QEventLoop>
 #include <QTimer>
-#include <QImageReader>
+#include <QElapsedTimer>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/imgcodecs.hpp>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -40,9 +42,19 @@ MainWindow::MainWindow(QWidget *parent, QString cameraLocation, QString labelLoc
 
     webcamName = cameraLocation;
     ui->setupUi(this);
-    this->resize(MAINWINDOW_WIDTH, MAINWINDOW_HEIGHT);
+    QMainWindow::showMaximized();
     scene = new QGraphicsScene(this);
     ui->graphicsView->setScene(scene);
+
+    ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+    ui->stopButton->setIcon(style()->standardIcon(QStyle::SP_MediaStop));
+    ui->videoSlider->setTracking(true);
+
+    ui->playButton->setVisible(false);
+    ui->stopButton->setVisible(false);
+    ui->videoSlider->setVisible(false);
+
+    connect(ui->videoSlider, SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged(int)));
 
     labelFile.setFileName(labelLocation);
     if (!labelFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -66,10 +78,15 @@ MainWindow::MainWindow(QWidget *parent, QString cameraLocation, QString labelLoc
     if (tpuEnable) {
         ui->inferenceThreadCount->setValue(1);
         ui->inferenceThreadCount->setEnabled(false);
-        ui->labelInference->setText("TPU Inference Time: ");
+        inferenceTimeLabel = "TPU Inference Time: ";
     } else {
-        ui->labelInference->setText("CPU Inference Time: ");
+        inferenceTimeLabel = "CPU Inference Time: ";
     }
+
+    ui->labelInference->setText(inferenceTimeLabel);
+
+    imageLoaded = false;
+    videoLoaded = false;
 
     qRegisterMetaType<cv::Mat>();
     opencvThread = new QThread();
@@ -79,7 +96,7 @@ MainWindow::MainWindow(QWidget *parent, QString cameraLocation, QString labelLoc
     cvWorker->moveToThread(opencvThread);
     connect(ui->pushButtonWebcam, SIGNAL(toggled(bool)), this, \
             SLOT(pushButtonWebcamCheck(bool)));
-    connect(cvWorker, SIGNAL(sendImage(const QImage&)), this, SLOT(showImage(const QImage&)));
+    connect(cvWorker, SIGNAL(sendImage(const cv::Mat&)), this, SLOT(showImage(const cv::Mat&)));
     connect(cvWorker, SIGNAL(webcamInit(bool)), this, SLOT(webcamInitStatus(bool)));
 
     QMetaObject::invokeMethod(cvWorker, "initialiseWebcam", Qt::AutoConnection, Q_ARG(QString,webcamName));
@@ -91,37 +108,39 @@ MainWindow::MainWindow(QWidget *parent, QString cameraLocation, QString labelLoc
     tfWorker = new tfliteWorker(tpuEnable,modelLocation);
     tfWorker->moveToThread(tfliteThread);
     connect(tfWorker, SIGNAL(requestImage()), this, SLOT(receiveRequest()));
-    connect(this, SIGNAL(sendImage(const QImage&)), tfWorker, SLOT(receiveImage(const QImage&)));
-    connect(tfWorker, SIGNAL(sendOutputTensor(const QVector<float>&, int, const QImage&)), \
-            this, SLOT(receiveOutputTensor(const QVector<float>&, int, const QImage&)));
+    connect(this, SIGNAL(sendImage(const cv::Mat&)), tfWorker, SLOT(receiveImage(const cv::Mat&)));
+    connect(tfWorker, SIGNAL(sendOutputTensor(const QVector<float>&, int, const cv::Mat&)), \
+            this, SLOT(receiveOutputTensor(const QVector<float>&, int, const cv::Mat&)));
     connect(this, SIGNAL(sendNumOfInferenceThreads(int)), tfWorker, SLOT(receiveNumOfInferenceThreads(int)));
 
     webcamTimer = new QTimer();
+    fpsTimer = new QElapsedTimer();
+    videoContinuousTimer = new QElapsedTimer();
+    videoTimer = new QTimer();
+    connect(videoTimer, SIGNAL(timeout()), this, SLOT(getVideoFileFrame()));
 }
 
-void MainWindow::on_pushButtonImage_clicked()
+void MainWindow::on_pushButtonFile_clicked()
 {
     qeventLoop = new QEventLoop;
     QString fileName;
     QStringList fileNames;
     QFileDialog dialog(this);
-    QString imageFilter;
+    QString fileFilter;
+    QString fileNameFull;
 
-    connect(this, SIGNAL(imageLoaded()), qeventLoop, SLOT(quit()));
+    connect(this, SIGNAL(fileLoaded()), qeventLoop, SLOT(quit()));
 
-    on_pushButtonStop_clicked();
+    on_stopButton_clicked();
     ui->pushButtonWebcam->setChecked(false);
     outputTensor.clear();
-    ui->labelInferenceTime->clear();
+    ui->labelInference->setText(inferenceTimeLabel);
     dialog.setFileMode(QFileDialog::AnyFile);
 
-    imageFilter = "Images (";
-    for (int i = 0; i < QImageReader::supportedImageFormats().count(); i++) {
-        imageFilter += "*." + QImageReader::supportedImageFormats().at(i) + " ";
-    }
-    imageFilter +=")";
+    fileFilter = "Images (*.bmp *.dib *.jpeg *.jpg *.jpe *.png *.pbm *.pgm *.ppm *.sr *.ras *.tiff *.tif);;";
+    fileFilter += "Videos (*.asf *.avi *.3gp *.mp4 *m4v *.mov *.flv *.mpeg *.mkv *.webm *.mxf *.ogg)";
 
-    dialog.setNameFilter(imageFilter);
+    dialog.setNameFilter(fileFilter);
     dialog.setViewMode(QFileDialog::Detail);
 
     if (dialog.exec())
@@ -130,25 +149,58 @@ void MainWindow::on_pushButtonImage_clicked()
     if(fileNames.count() > 0)
         fileName = fileNames.at(0);
 
-    if (!fileName.trimmed().isEmpty()) {
-        imageToSend.load(fileName);
-        if (imageToSend.width() != IMAGE_WIDTH || imageToSend.height() != IMAGE_HEIGHT)
-            imageToSend = imageToSend.scaled(IMAGE_WIDTH, IMAGE_HEIGHT, Qt::KeepAspectRatio);
-        image = QPixmap::fromImage(imageToSend);
-        scene->clear();
-        scene->addPixmap(image);
-        scene->setSceneRect(image.rect());
+    if (QFile::exists(fileName)) {
+        fileNameFull = QDir::current().absoluteFilePath(fileName);
+        if (dialog.selectedNameFilter().contains("Images")) {
+            matToSend = cv::imread(fileNameFull.toStdString());
+            drawMatToView(matToSend);
+
+            imageLoaded = true;
+            videoLoaded = false;
+            ui->checkBoxContinuous->setCheckState(Qt::Unchecked);
+            ui->checkBoxContinuous->setEnabled(false);
+            ui->playButton->setVisible(false);
+            ui->stopButton->setVisible(false);
+            ui->videoSlider->setVisible(false);
+        }
+        else if (dialog.selectedNameFilter().contains("Videos")) {
+            cap = cv::VideoCapture(fileNameFull.toStdString());
+            videoLoaded = false;
+            imageLoaded = false;
+            getVideoFileFrame();
+            ui->checkBoxContinuous->setEnabled(true);
+            ui->playButton->setVisible(true);
+            ui->stopButton->setVisible(true);
+            ui->videoSlider->setVisible(true);
+            ui->videoSlider->setMaximum(cap.get(cv::CAP_PROP_FRAME_COUNT));
+            fpsTimer->start();
+            videoContinuousTimer->start();
+        }
+    }
+    else {
+        QMessageBox::warning(this, "Warning", "File does not exist.");
     }
 
-    emit imageLoaded();
+    emit fileLoaded();
     qeventLoop->exec();
 }
 
 void MainWindow::on_pushButtonRun_clicked()
 {
-    if (!(image.depth() > 0)) {
-        QMessageBox::warning(this, "Warning", "No source selected, please select an image.");
-        return;
+    if (!imageLoaded && !videoLoaded) {
+            QMessageBox::warning(this, "Warning", "No source selected, please select a file.");
+            return;
+    }
+
+    if (ui->checkBoxContinuous->isChecked()) {
+        continuousMode = true;
+        fpsTimer->start();
+    }
+
+    if (videoLoaded) {
+        videoTimer->stop();
+        ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+        ui->playButton->setChecked(false);
     }
 
     QMetaObject::invokeMethod(tfWorker, "process");
@@ -162,27 +214,33 @@ void MainWindow::on_inferenceThreadCount_valueChanged(int threads)
 
 void MainWindow::receiveRequest()
 {
-    sendImage(imageToSend);
+    sendImage(matToSend);
     tfWorker->moveToThread(tfliteThread);
 }
 
-void MainWindow::receiveOutputTensor(const QVector<float>& receivedTensor, int receivedTimeElapsed, const QImage& receivedImage)
+void MainWindow::receiveOutputTensor(const QVector<float>& receivedTensor, int receivedTimeElapsed, const cv::Mat& receivedMat)
 {
     if (ui->pushButtonRun->isEnabled())
         return;
 
     outputTensor = receivedTensor;
 
-    ui->labelInferenceTime->setText(QString("%1 ms").arg(receivedTimeElapsed));
+    ui->labelInference->setText(inferenceTimeLabel + QString("%1 ms").arg(receivedTimeElapsed));
+
+    if (!ui->pushButtonWebcam->isChecked() && !ui->playButton->isChecked()) {
+       drawMatToView(receivedMat);
+    }
 
     if (!ui->checkBoxContinuous->isChecked()) {
         ui->pushButtonRun->setEnabled(true);
     } else {
-        image = QPixmap::fromImage(receivedImage);
-        scene->clear();
-        image.scaled(ui->graphicsView->width(), ui->graphicsView->height(), Qt::KeepAspectRatio);
-        scene->addPixmap(image);
-        scene->setSceneRect(image.rect());
+        drawMatToView(receivedMat);
+        drawFPS(fpsTimer->restart());
+        if (videoLoaded) {
+            getVideoFileFrame();
+            ui->playButton->setChecked(true);
+        }
+
         QMetaObject::invokeMethod(tfWorker, "process");
     }
 
@@ -192,48 +250,62 @@ void MainWindow::receiveOutputTensor(const QVector<float>& receivedTensor, int r
 void MainWindow::on_pushButtonStop_clicked()
 {
     ui->pushButtonRun->setEnabled(true);
+    continuousMode = false;
+    outputTensor.clear();
+    if(videoLoaded) {
+        ui->playButton->setChecked(false);
+        ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+        videoTimer->stop();
+    }
 }
 
 void MainWindow::on_pushButtonCapture_clicked()
 {
     on_pushButtonStop_clicked();
+    on_stopButton_clicked();
+    imageLoaded = true;
+    videoLoaded = false;
+    ui->playButton->setVisible(false);
+    ui->stopButton->setVisible(false);
+    ui->videoSlider->setVisible(false);
     ui->pushButtonWebcam->setChecked(false);
     outputTensor.clear();
-    ui->labelInferenceTime->clear();
+    ui->labelInference->setText(inferenceTimeLabel);
 
     imageToSend = imageNew;
-    image = QPixmap::fromImage(imageToSend);
-    scene->clear();
-    scene->addPixmap(image);
-    scene->setSceneRect(image.rect());
+    matToSend = matNew;
+    drawMatToView(matToSend);
 }
 
 void MainWindow::on_pushButtonWebcam_clicked()
 {
+    on_stopButton_clicked();
+    imageLoaded = true;
+    videoLoaded = false;
+    ui->playButton->setVisible(false);
+    ui->stopButton->setVisible(false);
+    ui->videoSlider->setVisible(false);
     outputTensor.clear();
-    ui->labelInferenceTime->clear();
+    ui->labelInference->setText(inferenceTimeLabel);
+    fpsTimer->start();
 }
 
-void MainWindow::showImage(const QImage& imageToShow)
+void MainWindow::showImage(const cv::Mat& matToShow)
 {
     if (ui->pushButtonWebcam->isEnabled()) {
         QMetaObject::invokeMethod(cvWorker, "readFrame");
         webcamTimer->start();
     }
 
-    imageNew = imageToShow;
+    matNew = matToShow;
 
-    if ((imageNew.width() != IMAGE_WIDTH || imageNew.height() != IMAGE_HEIGHT) && imageNew.depth() > 0)
-        imageNew = imageNew.scaled(IMAGE_WIDTH, IMAGE_HEIGHT);
+    if (ui->pushButtonWebcam->isChecked()) {
+        matToSend = matNew;
+    }
 
-    if (ui->pushButtonWebcam->isChecked())
-        imageToSend = imageNew;
-
-    if (ui->pushButtonWebcam->isChecked() && !ui->checkBoxContinuous->isChecked()) {
-        image = QPixmap::fromImage(imageToSend);
-        scene->clear();
-        scene->addPixmap(image);
-        scene->setSceneRect(image.rect());
+    if (ui->pushButtonWebcam->isChecked() && !continuousMode) {
+        drawMatToView(matNew);
+        drawFPS(fpsTimer->restart());
         drawBoxes();
     }
 }
@@ -255,7 +327,7 @@ void MainWindow::drawBoxes()
 
         scene->addRect(double(xmin), double(ymin), double(xmax - xmin), double(ymax - ymin), pen, brush);
 
-        itemName->setHtml(QString("<div style='background:rgba(0, 0, 0, 100%);'>" + \
+        itemName->setHtml(QString("<div style='background:rgba(0, 0, 0, 100%);font-size:x-large;'>" + \
                                   QString(labelList[int(outputTensor[i])] + " " + \
                                   QString::number(double(scorePercentage), 'f', 1) + "%") + \
                           QString("</div>")));
@@ -263,6 +335,19 @@ void MainWindow::drawBoxes()
         itemName->setDefaultTextColor(TEXT_COLOUR);
         itemName->setZValue(1);
     }
+
+}
+
+void MainWindow::drawFPS(qint64 timeElapsed)
+{
+    float fpsValue = 1000.0/timeElapsed;
+    QGraphicsTextItem* itemFPS = scene->addText(nullptr);
+    itemFPS->setHtml(QString("<div style='background:rgba(0, 0, 0, 100%);font-size:x-large;'>" + \
+                      QString( QString::number(double(fpsValue), 'f', 1) + " FPS") + \
+                      QString("</div>")));
+    itemFPS->setPos(scene->width() - X_FPS , Y_FPS);
+    itemFPS->setDefaultTextColor(TEXT_COLOUR);
+    itemFPS->setZValue(1);
 }
 
 /*
@@ -274,9 +359,12 @@ void MainWindow::pushButtonWebcamCheck(bool webcamButtonChecked)
 {
     if (webcamButtonChecked) {
         ui->checkBoxContinuous->setEnabled(true);
+        videoLoaded = false;
+        imageLoaded = true;
     } else {
         ui->checkBoxContinuous->setCheckState(Qt::Unchecked);
         ui->checkBoxContinuous->setEnabled(false);
+        continuousMode = false;
     }
 }
 
@@ -337,4 +425,127 @@ void MainWindow::on_actionDisconnect_triggered()
     ui->pushButtonWebcam->setEnabled(false);
     ui->pushButtonCapture->setEnabled(false);
     QMessageBox::warning(this, "Warning", "Webcam not connected");
+}
+
+void MainWindow::on_playButton_clicked()
+{
+    if (ui->playButton->isChecked()) {
+        ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
+        ui->pushButtonWebcam->setChecked(false);
+        outputTensor.clear();
+        ui->labelInference->setText(inferenceTimeLabel);
+        videoTimer->start(fpsToDelay(cap.get(cv::CAP_PROP_FPS)));
+        getVideoFileFrame();
+    } else {
+        on_pushButtonStop_clicked();
+    }
+
+}
+
+void MainWindow::on_stopButton_clicked()
+{
+    on_pushButtonStop_clicked();
+    videoTimer->stop();
+    videoLoaded = false;
+    cap.set(cv::CAP_PROP_POS_FRAMES, 0);
+    getVideoFileFrame();
+    ui->playButton->setChecked(false);
+    ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+    scene->clear();
+}
+
+void MainWindow::on_checkBoxContinuous_clicked()
+{
+    if (!ui->checkBoxContinuous->isChecked()) {
+        ui->pushButtonRun->setEnabled(true);
+        if(videoLoaded && continuousMode) {
+            ui->playButton->setChecked(false);
+            on_playButton_clicked();
+        }
+    }
+}
+
+void MainWindow::sliderValueChanged(int value)
+{
+    if (ui->videoSlider->isSliderDown()) {
+        on_pushButtonStop_clicked();
+        cap.set(cv::CAP_PROP_POS_FRAMES, value);
+    }
+}
+
+void MainWindow::on_videoSlider_sliderReleased()
+{
+    matToSend = captureVideoFrame();
+    drawMatToView(matToSend);
+    drawBoxes();
+}
+
+
+cv::Mat MainWindow::captureVideoFrame()
+{
+    if (cap.get(cv::CAP_PROP_POS_FRAMES) == cap.get(cv::CAP_PROP_FRAME_COUNT))
+        cap.set(cv::CAP_PROP_POS_FRAMES, 0);
+    cv::Mat videoFrame;
+    cap >> videoFrame;
+    if (videoFrame.empty())
+        cap.set(cv::CAP_PROP_POS_FRAMES, 0);
+
+    return videoFrame;
+}
+
+QImage MainWindow::matToQImage(const cv::Mat& matToConvert)
+{
+    cv::Mat matToConvertRGB;
+    QImage convertedImage;
+
+    if (matToConvert.empty())
+        return QImage(nullptr);
+
+    cv::cvtColor(matToConvert, matToConvertRGB, cv::COLOR_BGR2RGB);
+
+    convertedImage = QImage(matToConvertRGB.data, matToConvertRGB.cols, \
+                     matToConvertRGB.rows, int(matToConvertRGB.step), \
+                        QImage::Format_RGB888).copy();
+    return convertedImage;
+}
+
+void MainWindow::getVideoFileFrame()
+{
+        cv::Mat videoMat;
+        ui->videoSlider->setValue(cap.get(cv::CAP_PROP_POS_FRAMES));
+        videoMat = captureVideoFrame();
+
+        if (!videoLoaded) {
+            matToSend = videoMat;
+            videoLoaded = true;
+        }
+
+        if (ui->playButton->isChecked()) {
+            ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
+            matToSend = videoMat;
+        }
+
+        if ((ui->playButton->isChecked() && !continuousMode) || !videoLoaded) {
+            drawMatToView(videoMat);
+            drawFPS(fpsTimer->restart());
+            drawBoxes();
+        }
+}
+
+int MainWindow::fpsToDelay(float fps)
+{
+    return 1000/fps;
+}
+
+void MainWindow::drawMatToView(const cv::Mat& matInput)
+{
+
+    QImage imageToDraw;
+
+    imageToDraw = matToQImage(matInput);
+
+    image = QPixmap::fromImage(imageToDraw);
+    scene->clear();
+    scene->addPixmap(image);
+    scene->setSceneRect(image.rect());
 }

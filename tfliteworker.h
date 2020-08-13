@@ -24,10 +24,11 @@
 #include <QObject>
 #include <QVector>
 
-
+namespace cv {
+    class Mat;
+}
 
 #define DETECT_THRESHOLD 0.5
-#define BITS_TO_BYTE 8
 
 class tfliteWorker : public QObject
 {
@@ -37,10 +38,12 @@ public:
     tfliteWorker(bool tpuEnable, QString modelLocation);
 
 signals:
-    void sendOutputTensor(const QVector<float>&, int, const QImage&);
+    void sendOutputTensor(const QVector<float>&, int, const cv::Mat&);
     void requestImage();
 
 private:
+    void ProcessInputWithFloatModel(uint8_t* input, uint8_t* buffer);
+
     std::unique_ptr<tflite::Interpreter> tfliteInterpreter;
     std::unique_ptr<tflite::FlatBufferModel> tfliteModel;
     std::string modelName;
@@ -50,7 +53,7 @@ private:
 
 private slots:
     void process();
-    void receiveImage(const QImage& sentImage);
+    void receiveImage(const cv::Mat& sentMat);
     void receiveNumOfInferenceThreads(int threads);
 };
 
