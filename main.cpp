@@ -41,7 +41,8 @@ int main(int argc, char *argv[])
     QString applicationDescription = \
     "Object Detection Demo\n"\
     "  Draws boxes around detected objects and displays the name and\n"\
-    "  confidence of the object. Also displays inference time.\n\n"\
+    "  confidence of the object. Also displays inference time and FPS\n"\
+    "  if applicable.\n\n"\
     "Required Hardware:\n"\
     "  Camera: Currently supports Logitech C922 Pro Stream, should\n"\
     "          work with any UVC compatible USB camera that has a\n"\
@@ -51,18 +52,21 @@ int main(int argc, char *argv[])
     "  MobileNet v2 SSD Quantised TensorFlow Lite\n\n"\
     "Buttons:\n"\
     "  Run: Run inference on the selected image once.\n"\
-    "  Load Image: Load an image from the filesystem. Supported formats are\n"\
-    "              bmp, jpg, and png.\n"\
-    "  Load Webcam: Load a webcam stream.\n"\
-    "  Capture Image: Capture an image from the webcam.\n"\
-    "  Continuous Checkbox: Only available when a webcam stream is loaded.\n"\
-    "                       Enable to continuously run inference.\n"\
+    "  Load File: Load an image or video from the filesystem. Media formats\n"\
+    "             supported by OpenCV 4.1.1 and GStreamer 1.12.2 can be\n"\
+    "             opened, including mp4, m4v, mkv, webm, bmp, jpg, png.\n"\
+    "  Video Controls: Only available when video is loaded. Play,\n"\
+    "                  pause, stop, and seek can be performed.\n"\
+    "  Load Camera: Load a camera stream.\n"\
+    "  Capture Image: Capture an image from the camera.\n"\
+    "  Continuous Checkbox: Only available when a camera stream or video\n"\
+    "                       is loaded. Enable to continuously run inference.\n"\
     "  Stop: Stop continuous inference.\n"\
     "  Threads: Only available in CPU mode. Change the number of inference\n"\
     "           threads.\n"\
     "  About->License: Read the license that this app is licensed under.\n"\
-    "  Camera->Reset: Reset the connection to the webcam.\n"\
-    "  Camera->Disconnect: Disconnect the currently connected webcam.\n\n"\
+    "  Camera->Reset: Reset the connection to the camera.\n"\
+    "  Camera->Disconnect: Disconnect the currently connected camera.\n\n"\
     "Default options:\n"\
     "  Camera: /dev/v4l/by-id/<first file>\n"\
     "  Label: ./*label*.txt\n"\

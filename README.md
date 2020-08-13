@@ -72,7 +72,8 @@ and requires [TensorFlow Lite](https://github.com/tensorflow/tensorflow/tree/v2.
 Usage: ./object_detection_demo [options]
 Object Detection Demo
   Draws boxes around detected objects and displays the name and
-  confidence of the object. Also displays inference time.
+  confidence of the object. Also displays inference time and FPS
+  if applicable.
 
 Required Hardware:
   Camera: Currently supports Logitech C922 Pro Stream, should
@@ -85,18 +86,21 @@ Supported Models:
 
 Buttons:
   Run: Run inference on the selected image once.
-  Load Image: Load an image from the filesystem. Supported formats are
-              bmp, jpg, and png.
-  Load Webcam: Load a webcam stream.
-  Capture Image: Capture an image from the webcam.
-  Continuous Checkbox: Only available when a webcam stream is loaded.
-                       Enable to continuously run inference.
+  Load File: Load an image or video from the filesystem. Media formats
+             supported by OpenCV 4.1.1 and GStreamer 1.12.2 can be
+             opened, including mp4, m4v, mkv, webm, bmp, jpg, png.
+  Video Controls: Only available when video is loaded. Play,
+                  pause, stop, and seek can be performed.
+  Load Camera: Load a camera stream.
+  Capture Image: Capture an image from the camera.
+  Continuous Checkbox: Only available when a camera stream or video
+                       is loaded. Enable to continuously run inference.
   Stop: Stop continuous inference.
   Threads: Only available in CPU mode. Change the number of inference
            threads.
   About->License: Read the license that this app is licensed under.
-  Camera->Reset: Reset the connection to the webcam.
-  Camera->Disconnect: Disconnect the currently connected webcam.
+  Camera->Reset: Reset the connection to the camera.
+  Camera->Disconnect: Disconnect the currently connected camera.
 
 Default options:
   Camera: /dev/v4l/by-id/<first file>
