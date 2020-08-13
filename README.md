@@ -6,10 +6,11 @@ and requires [TensorFlow Lite](https://github.com/tensorflow/tensorflow/tree/v2.
 
 ## Manual Build Instructions
 ### Target: RZ/G2M (hihope-rzg2m)
-1. Have a suitable cross toolchain by building `bitbake core-image-qt-sdk -c populate_sdk`. This requires adding the line:
-`IMAGE_INSTALL_append = " tensorflow-lite-staticdev tensorflow-lite-dev google-coral-dev google-coral"`
-with the Yocto meta-layers described in [meta-rzg2](https://github.com/renesas-rz/meta-rzg2)
-and [meta-renesas-ai](https://github.com/renesas-rz/meta-renesas-ai).
+1. Setup the the Yocto environment as described in [meta-renesas-ai](https://github.com/renesas-rz/meta-renesas-ai) with the meta-layers described in [meta-rzg2](https://github.com/renesas-rz/meta-rzg2).
+   ```
+   Copy the local.conf file from meta-renesas-ai/meta-benchmark/templates/<Board>/local.conf into the build/conf directory.
+   Build a suitable cross toolchain with `bitbake core-image-qt-sdk -c populate_sdk`.
+   ```
 2. Install cross toolchain with `sudo sh ./poky-glibc-x86_64-core-image-qt-sdk-aarch64-toolchain-2.4.3.sh`.
 3. Set up environment variables with `source /<SDK location>/environment-setup-aarch64-poky-linux`.
 4. Run `qmake`.
