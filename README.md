@@ -99,6 +99,7 @@ Buttons:
   Threads: Only available in CPU mode. Change the number of inference
            threads.
   About->License: Read the license that this app is licensed under.
+  About->Exit: Close the application.
   Camera->Reset: Reset the connection to the camera.
   Camera->Disconnect: Disconnect the currently connected camera.
 

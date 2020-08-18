@@ -329,6 +329,7 @@
      <string>About</string>
     </property>
     <addaction name="actionLicense"/>
+    <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuCamera">
     <property name="title">
@@ -354,6 +355,14 @@
   <action name="actionDisconnect">
    <property name="text">
     <string>Disconnect</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+   <property name="shortcut">
+    <string>Esc</string>
    </property>
   </action>
  </widget>

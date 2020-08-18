@@ -86,6 +86,7 @@ private slots:
     void on_checkBoxContinuous_clicked();
     void on_videoSlider_sliderReleased();
     void getVideoFileFrame();
+    void on_actionExit_triggered();
 
 private:
     void drawBoxes();

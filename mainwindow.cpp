@@ -549,3 +549,8 @@ void MainWindow::drawMatToView(const cv::Mat& matInput)
     scene->addPixmap(image);
     scene->setSceneRect(image.rect());
 }
+
+void MainWindow::on_actionExit_triggered()
+{
+    QApplication::quit();
+}

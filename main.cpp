@@ -65,6 +65,7 @@ int main(int argc, char *argv[])
     "  Threads: Only available in CPU mode. Change the number of inference\n"\
     "           threads.\n"\
     "  About->License: Read the license that this app is licensed under.\n"\
+    "  About->Exit: Close the application.\n"\
     "  Camera->Reset: Reset the connection to the camera.\n"\
     "  Camera->Disconnect: Disconnect the currently connected camera.\n\n"\
     "Default options:\n"\
