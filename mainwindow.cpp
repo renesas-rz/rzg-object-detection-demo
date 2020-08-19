@@ -296,18 +296,19 @@ void MainWindow::on_pushButtonWebcam_clicked()
     outputTensor.clear();
     ui->labelInference->setText(inferenceTimeLabel);
     fpsTimer->start();
+    if (ui->pushButtonWebcam->isChecked()) {
+        QMetaObject::invokeMethod(cvWorker, "readFrame");
+    } else {
+        webcamTimer->stop();
+    }
 }
 
 void MainWindow::showImage(const cv::Mat& matToShow)
 {
-    if (ui->pushButtonWebcam->isEnabled()) {
+    if (ui->pushButtonWebcam->isChecked()) {
+        matNew = matToShow;
         QMetaObject::invokeMethod(cvWorker, "readFrame");
         webcamTimer->start();
-    }
-
-    matNew = matToShow;
-
-    if (ui->pushButtonWebcam->isChecked()) {
         matToSend = matNew;
     }
 
@@ -370,6 +371,7 @@ void MainWindow::pushButtonWebcamCheck(bool webcamButtonChecked)
         videoLoaded = false;
         imageLoaded = true;
     } else {
+        webcamTimer->stop();
         ui->checkBoxContinuous->setCheckState(Qt::Unchecked);
         ui->checkBoxContinuous->setEnabled(false);
         continuousMode = false;
@@ -391,7 +393,6 @@ void MainWindow::webcamInitStatus(bool webcamStatus)
         webcamTimer->setInterval(1000);
         webcamTimer->setSingleShot(true);
         connect(webcamTimer, SIGNAL(timeout()), this, SLOT(webcamTimeout()));
-        webcamTimer->start();
     }
 }
 
