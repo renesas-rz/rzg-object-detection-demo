@@ -268,7 +268,15 @@ void MainWindow::on_pushButtonCapture_clicked()
     ui->playButton->setVisible(false);
     ui->stopButton->setVisible(false);
     ui->videoSlider->setVisible(false);
-    ui->pushButtonWebcam->setChecked(false);
+
+    if (ui->pushButtonWebcam->isChecked()) {
+        ui->pushButtonWebcam->setChecked(false);
+    } else {
+        ui->checkBoxContinuous->setCheckState(Qt::Unchecked);
+        ui->checkBoxContinuous->setEnabled(false);
+        continuousMode = false;
+    }
+
     outputTensor.clear();
     ui->labelInference->setText(inferenceTimeLabel);
 
