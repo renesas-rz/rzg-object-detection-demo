@@ -1,0 +1,7 @@
+*.o
+*.swp
+Makefile
+moc_*.cpp
+object_detection_demo
+object_detection_demo.pro.user
+ui_mainwindow.h
