@@ -82,8 +82,10 @@ MainWindow::MainWindow(QWidget *parent, QString cameraLocation, QString labelLoc
     } else {
         inferenceTimeLabel = "CPU Inference Time: ";
     }
+    cameraStatusLabel = "Camera status: ";
 
     ui->labelInference->setText(inferenceTimeLabel);
+    ui->labelCamera->setText(cameraStatusLabel);
 
     imageLoaded = false;
     videoLoaded = false;
@@ -384,8 +386,8 @@ void MainWindow::webcamInitStatus(bool webcamStatus)
         webcamTimer->stop();
         ui->pushButtonWebcam->setEnabled(false);
         ui->pushButtonCapture->setEnabled(false);
-        QMessageBox::warning(this, "Warning", "Webcam not connected");
         ui->pushButtonWebcam->setChecked(false);
+	ui->labelCamera->setText(cameraStatusLabel + QString("Disconnected"));
     } else {
         ui->pushButtonWebcam->setEnabled(true);
         ui->pushButtonCapture->setEnabled(true);
@@ -393,6 +395,7 @@ void MainWindow::webcamInitStatus(bool webcamStatus)
         webcamTimer->setInterval(1000);
         webcamTimer->setSingleShot(true);
         connect(webcamTimer, SIGNAL(timeout()), this, SLOT(webcamTimeout()));
+	ui->labelCamera->setText(cameraStatusLabel + QString("Connected"));
     }
 }
 
@@ -423,8 +426,8 @@ void MainWindow::webcamTimeout()
     opencvThread->deleteLater();
     ui->pushButtonWebcam->setEnabled(false);
     ui->pushButtonCapture->setEnabled(false);
-    QMessageBox::warning(this, "Warning", "Webcam not connected");
     ui->pushButtonWebcam->setChecked(false);
+    ui->labelCamera->setText(cameraStatusLabel + QString("Disconnected"));
 }
 
 void MainWindow::on_actionDisconnect_triggered()
@@ -433,7 +436,7 @@ void MainWindow::on_actionDisconnect_triggered()
     QMetaObject::invokeMethod(cvWorker, "disconnectWebcam");
     ui->pushButtonWebcam->setEnabled(false);
     ui->pushButtonCapture->setEnabled(false);
-    QMessageBox::warning(this, "Warning", "Webcam not connected");
+    ui->labelCamera->setText(cameraStatusLabel + QString("Disconnected"));
 }
 
 void MainWindow::on_playButton_clicked()

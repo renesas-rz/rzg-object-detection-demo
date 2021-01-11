@@ -113,6 +113,7 @@ private:
     QString webcamName;
     QStringList labelList;
     QString inferenceTimeLabel;
+    QString cameraStatusLabel;
     bool imageLoaded;
     bool videoLoaded;
     bool continuousMode;
