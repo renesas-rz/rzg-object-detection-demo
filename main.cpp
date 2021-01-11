@@ -118,6 +118,7 @@ int main(int argc, char *argv[])
         }
     }
 
+    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     MainWindow w(nullptr, cameraLocation, labelLocation, modelLocation, tpu);
     w.show();
     return a.exec();
