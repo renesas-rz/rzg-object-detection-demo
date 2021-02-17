@@ -32,7 +32,7 @@
 #include "tfliteworker.h"
 #include "opencvworker.h"
 
-MainWindow::MainWindow(QWidget *parent, QString cameraLocation, QString labelLocation, \
+MainWindow::MainWindow(QWidget *parent, QString cameraLocation, QString labelLocation,
                        QString modelLocation, bool tpuEnable)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -95,7 +95,7 @@ MainWindow::MainWindow(QWidget *parent, QString cameraLocation, QString labelLoc
     opencvThread->start();
     cvWorker = new opencvWorker();
     cvWorker->moveToThread(opencvThread);
-    connect(ui->pushButtonWebcam, SIGNAL(toggled(bool)), this, \
+    connect(ui->pushButtonWebcam, SIGNAL(toggled(bool)), this,
             SLOT(pushButtonWebcamCheck(bool)));
     connect(cvWorker, SIGNAL(sendImage(const cv::Mat&)), this, SLOT(showImage(const cv::Mat&)));
     connect(cvWorker, SIGNAL(webcamInit(bool)), this, SLOT(webcamInitStatus(bool)));
@@ -110,7 +110,7 @@ MainWindow::MainWindow(QWidget *parent, QString cameraLocation, QString labelLoc
     tfWorker->moveToThread(tfliteThread);
     connect(tfWorker, SIGNAL(requestImage()), this, SLOT(receiveRequest()));
     connect(this, SIGNAL(sendImage(const cv::Mat&)), tfWorker, SLOT(receiveImage(const cv::Mat&)));
-    connect(tfWorker, SIGNAL(sendOutputTensor(const QVector<float>&, int, const cv::Mat&)), \
+    connect(tfWorker, SIGNAL(sendOutputTensor(const QVector<float>&, int, const cv::Mat&)),
             this, SLOT(receiveOutputTensor(const QVector<float>&, int, const cv::Mat&)));
     connect(this, SIGNAL(sendNumOfInferenceThreads(int)), tfWorker, SLOT(receiveNumOfInferenceThreads(int)));
 
@@ -252,6 +252,7 @@ void MainWindow::on_pushButtonStop_clicked()
     ui->pushButtonRun->setEnabled(true);
     continuousMode = false;
     outputTensor.clear();
+
     if(videoLoaded) {
         ui->playButton->setChecked(false);
         ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
@@ -296,6 +297,7 @@ void MainWindow::on_pushButtonWebcam_clicked()
     outputTensor.clear();
     ui->labelInference->setText(inferenceTimeLabel);
     fpsTimer->start();
+
     if (ui->pushButtonWebcam->isChecked())
         QMetaObject::invokeMethod(cvWorker, "readFrame");
     else
@@ -335,23 +337,22 @@ void MainWindow::drawBoxes()
 
         scene->addRect(double(xmin), double(ymin), double(xmax - xmin), double(ymax - ymin), pen, brush);
 
-        itemName->setHtml(QString("<div style='background:rgba(0, 0, 0, 100%);font-size:x-large;'>" + \
-                                  QString(labelList[int(outputTensor[i])] + " " + \
-                                  QString::number(double(scorePercentage), 'f', 1) + "%") + \
+        itemName->setHtml(QString("<div style='background:rgba(0, 0, 0, 100%);font-size:x-large;'>" +
+                                  QString(labelList[int(outputTensor[i])] + " " +
+                                  QString::number(double(scorePercentage), 'f', 1) + "%") +
                           QString("</div>")));
         itemName->setPos(double(xmin - X_TEXT_OFFSET), double(ymin - Y_TEXT_OFFSET));
         itemName->setDefaultTextColor(TEXT_COLOUR);
         itemName->setZValue(1);
     }
-
 }
 
 void MainWindow::drawFPS(qint64 timeElapsed)
 {
     float fpsValue = 1000.0/timeElapsed;
     QGraphicsTextItem* itemFPS = scene->addText(nullptr);
-    itemFPS->setHtml(QString("<div style='background:rgba(0, 0, 0, 100%);font-size:x-large;'>" + \
-                      QString( QString::number(double(fpsValue), 'f', 1) + " FPS") + \
+    itemFPS->setHtml(QString("<div style='background:rgba(0, 0, 0, 100%);font-size:x-large;'>" +
+                      QString( QString::number(double(fpsValue), 'f', 1) + " FPS") +
                       QString("</div>")));
     itemFPS->setPos(scene->width() - X_FPS , Y_FPS);
     itemFPS->setDefaultTextColor(TEXT_COLOUR);
@@ -384,7 +385,7 @@ void MainWindow::webcamInitStatus(bool webcamStatus)
         ui->pushButtonWebcam->setEnabled(false);
         ui->pushButtonCapture->setEnabled(false);
         ui->pushButtonWebcam->setChecked(false);
-	ui->labelCamera->setText(cameraStatusLabel + QString("Disconnected"));
+        ui->labelCamera->setText(cameraStatusLabel + QString("Disconnected"));
     } else {
         ui->pushButtonWebcam->setEnabled(true);
         ui->pushButtonCapture->setEnabled(true);
@@ -392,24 +393,24 @@ void MainWindow::webcamInitStatus(bool webcamStatus)
         webcamTimer->setInterval(1000);
         webcamTimer->setSingleShot(true);
         connect(webcamTimer, SIGNAL(timeout()), this, SLOT(webcamTimeout()));
-	ui->labelCamera->setText(cameraStatusLabel + QString("Connected"));
+        ui->labelCamera->setText(cameraStatusLabel + QString("Connected"));
     }
 }
 
 void MainWindow::on_actionLicense_triggered()
 {
     QMessageBox::information(this, "License",
-                             "Copyright (C) 2020 Renesas Electronics Corp.\n\n" \
-                             "The RZG Object Detection Demo is free software using the Qt Open Source Model: "\
-                             "you can redistribute it and/or modify "\
-                             "it under the terms of the GNU General Public License as published by "\
-                             "the Free Software Foundation, either version 2 of the License, or "\
-                             "(at your option) any later version.\n\n" \
-                             "The RZG Object Detection Demo is distributed in the hope that it will be useful, "\
-                             "but WITHOUT ANY WARRANTY; without even the implied warranty of "\
-                             "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the "\
-                             "GNU General Public License for more details.\n\n" \
-                             "You should have received a copy of the GNU General Public License "\
+                             "Copyright (C) 2020 Renesas Electronics Corp.\n\n"
+                             "The RZG Object Detection Demo is free software using the Qt Open Source Model: "
+                             "you can redistribute it and/or modify "
+                             "it under the terms of the GNU General Public License as published by "
+                             "the Free Software Foundation, either version 2 of the License, or "
+                             "(at your option) any later version.\n\n"
+                             "The RZG Object Detection Demo is distributed in the hope that it will be useful, "
+                             "but WITHOUT ANY WARRANTY; without even the implied warranty of "
+                             "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the "
+                             "GNU General Public License for more details.\n\n"
+                             "You should have received a copy of the GNU General Public License "
                              "along with the RZG Object Detection Demo. If not, see https://www.gnu.org/licenses.");
 }
 
@@ -496,7 +497,7 @@ cv::Mat MainWindow::resizeKeepAspectRatio(const cv::Mat& matInput)
     double height = ui->graphicsView->width() * (matInput.rows/(double)matInput.cols);
     double width = (ui->graphicsView->height() - HEIGHT_OFFSET) * (matInput.cols/(double)matInput.rows);
 
-    if( height <= (ui->graphicsView->height() - HEIGHT_OFFSET))
+    if(height <= (ui->graphicsView->height() - HEIGHT_OFFSET))
         cv::resize(matInput, matOutput, cv::Size(ui->graphicsView->width(), height));
     else
         cv::resize(matInput, matOutput, cv::Size(width, (ui->graphicsView->height() - HEIGHT_OFFSET)));
@@ -508,8 +509,10 @@ cv::Mat MainWindow::captureVideoFrame()
 {
     if (cap.get(cv::CAP_PROP_POS_FRAMES) == cap.get(cv::CAP_PROP_FRAME_COUNT))
         cap.set(cv::CAP_PROP_POS_FRAMES, 0);
+
     cv::Mat videoFrame;
     cap >> videoFrame;
+
     if (videoFrame.empty())
         cap.set(cv::CAP_PROP_POS_FRAMES, 0);
 
@@ -526,9 +529,10 @@ QImage MainWindow::matToQImage(const cv::Mat& matToConvert)
 
     cv::cvtColor(matToConvert, matToConvertRGB, cv::COLOR_BGR2RGB);
 
-    convertedImage = QImage(matToConvertRGB.data, matToConvertRGB.cols, \
-                     matToConvertRGB.rows, int(matToConvertRGB.step), \
+    convertedImage = QImage(matToConvertRGB.data, matToConvertRGB.cols,
+                     matToConvertRGB.rows, int(matToConvertRGB.step),
                         QImage::Format_RGB888).copy();
+
     return convertedImage;
 }
 

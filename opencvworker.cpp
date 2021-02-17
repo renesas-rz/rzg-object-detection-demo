@@ -26,10 +26,10 @@ void opencvWorker::initialiseWebcam(QString cameraLocation)
         videoCapture->release();
 
     if (!cameraLocation.isEmpty()) {
-        gstreamerPipeline = "v4l2src device=" + QString(cameraLocation) + \
-            " ! video/x-raw, width=" CAMERA_WIDTH ", height=" CAMERA_HEIGHT \
+        gstreamerPipeline = "v4l2src device=" + QString(cameraLocation) +
+            " ! video/x-raw, width=" CAMERA_WIDTH ", height=" CAMERA_HEIGHT
             " ! videoconvert ! appsink";
-        videoCapture.reset(new cv::VideoCapture(gstreamerPipeline.toStdString(), \
+        videoCapture.reset(new cv::VideoCapture(gstreamerPipeline.toStdString(),
                                                 cv::CAP_GSTREAMER));
 
         webcamInitialised = videoCapture->isOpened();

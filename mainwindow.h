@@ -29,7 +29,7 @@
 #define TEXT_COLOUR Qt::white
 #define X_TEXT_OFFSET 6
 #define Y_TEXT_OFFSET 18
-#define HEIGHT_OFFSET 50      //Leave a small offset space in case labels are outside of image
+#define HEIGHT_OFFSET 50      // Leave a small offset space in case labels are outside of image
 #define X_FPS 95              // Place FPS text in top right hand corner
 #define Y_FPS 0
 
@@ -42,14 +42,14 @@ class opencvWorker;
 class tfliteWorker;
 class QElapsedTimer;
 
-namespace Ui { class MainWindow; } //Needed for mainwindow.ui
+namespace Ui { class MainWindow; } // Needed for mainwindow.ui
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent, QString cameraLocation, QString labelLocation, \
+    MainWindow(QWidget *parent, QString cameraLocation, QString labelLocation,
                QString modelLocation, bool tpuEnable);
 
 signals:

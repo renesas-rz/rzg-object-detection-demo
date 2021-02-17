@@ -30,6 +30,7 @@ tfliteWorker::tfliteWorker(bool tpuEnable, QString modelLocation)
         numberOfInferenceThreads = 1;
         edgetpu::EdgeTpuContext* edgetpu_context =
               edgetpu::EdgeTpuManager::GetSingleton()->NewEdgeTpuContext().release();
+
         tfliteResolver.AddCustom(edgetpu::kCustomOp, edgetpu::RegisterCustomOp());
         tfliteModel = tflite::FlatBufferModel::BuildFromFile(modelLocation.toStdString().c_str());
         tflite::InterpreterBuilder(*tfliteModel, tfliteResolver) (&tfliteInterpreter);
@@ -76,14 +77,14 @@ void tfliteWorker::receiveImage(const cv::Mat& sentMat)
 
     stopTime = std::chrono::high_resolution_clock::now();
 
-    for (int i = 0; tfliteInterpreter->typed_output_tensor<float>(2)[i] > float(DETECT_THRESHOLD)\
+    for (int i = 0; tfliteInterpreter->typed_output_tensor<float>(2)[i] > float(DETECT_THRESHOLD)
          && tfliteInterpreter->typed_output_tensor<float>(2)[i] <= float(1.0); i++){
-        outputTensor.push_back(tfliteInterpreter->typed_output_tensor<float>(1)[i]);          //item
-        outputTensor.push_back(tfliteInterpreter->typed_output_tensor<float>(2)[i]);          //confidence
-        outputTensor.push_back(tfliteInterpreter->typed_output_tensor<float>(0)[i * 4]);      //box ymin
-        outputTensor.push_back(tfliteInterpreter->typed_output_tensor<float>(0)[i * 4 + 1]);  //box xmin
-        outputTensor.push_back(tfliteInterpreter->typed_output_tensor<float>(0)[i * 4 + 2]);  //box ymax
-        outputTensor.push_back(tfliteInterpreter->typed_output_tensor<float>(0)[i * 4 + 3]);  //box xmax
+        outputTensor.push_back(tfliteInterpreter->typed_output_tensor<float>(1)[i]);          // item
+        outputTensor.push_back(tfliteInterpreter->typed_output_tensor<float>(2)[i]);          // confidence
+        outputTensor.push_back(tfliteInterpreter->typed_output_tensor<float>(0)[i * 4]);      // box ymin
+        outputTensor.push_back(tfliteInterpreter->typed_output_tensor<float>(0)[i * 4 + 1]);  // box xmin
+        outputTensor.push_back(tfliteInterpreter->typed_output_tensor<float>(0)[i * 4 + 2]);  // box ymax
+        outputTensor.push_back(tfliteInterpreter->typed_output_tensor<float>(0)[i * 4 + 3]);  // box xmax
     }
 
     timeElapsed = int(std::chrono::duration_cast<std::chrono::milliseconds>(stopTime - startTime).count());
