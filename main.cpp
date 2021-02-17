@@ -87,17 +87,16 @@ int main(int argc, char *argv[])
     modelLocation = parser.value(modelOption);
     tpu = parser.isSet(tpuOption);
 
-    if (cameraLocation.isEmpty() && QDir("/dev/v4l/by-id").exists()) {
+    if (cameraLocation.isEmpty() && QDir("/dev/v4l/by-id").exists())
         cameraLocation = QDir("/dev/v4l/by-id").entryInfoList(\
                     QDir::NoDotAndDotDot).at(0).absoluteFilePath();
-    }
 
     if (labelLocation.isEmpty()) {
         dir.setPath(QDir::currentPath());
         filesAtPwd = dir.entryList(QStringList("*label*.txt"));
-        if (filesAtPwd.isEmpty()) {
+        if (filesAtPwd.isEmpty())
             qFatal("Label txt file not found in current directory,  please specify a file with -l");
-        }
+
         labelLocation = filesAtPwd.at(0);
     } else {
         if (!QFile::exists(labelLocation))

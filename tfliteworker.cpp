@@ -40,9 +40,8 @@ tfliteWorker::tfliteWorker(bool tpuEnable, QString modelLocation)
         tflite::InterpreterBuilder(*tfliteModel, tfliteResolver) (&tfliteInterpreter);
     }
 
-    if (tfliteInterpreter->AllocateTensors() != kTfLiteOk && tpuEnable) {
+    if (tfliteInterpreter->AllocateTensors() != kTfLiteOk && tpuEnable)
         qFatal("Failed to allocate tensors, is the TPU device connected?");
-    }
 
     tfliteInterpreter->SetProfiler(nullptr);
     tfliteInterpreter->SetNumThreads(numberOfInferenceThreads);

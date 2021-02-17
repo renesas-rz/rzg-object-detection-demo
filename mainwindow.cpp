@@ -57,9 +57,8 @@ MainWindow::MainWindow(QWidget *parent, QString cameraLocation, QString labelLoc
     connect(ui->videoSlider, SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged(int)));
 
     labelFile.setFileName(labelLocation);
-    if (!labelFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    if (!labelFile.open(QIODevice::ReadOnly | QIODevice::Text))
         qFatal("%s could not be opened.", labelLocation.toStdString().c_str());
-    }
 
     while (!labelFile.atEnd()) {
         fileLine = labelFile.readLine();
@@ -229,9 +228,8 @@ void MainWindow::receiveOutputTensor(const QVector<float>& receivedTensor, int r
 
     ui->labelInference->setText(inferenceTimeLabel + QString("%1 ms").arg(receivedTimeElapsed));
 
-    if (!ui->pushButtonWebcam->isChecked() && !ui->playButton->isChecked()) {
+    if (!ui->pushButtonWebcam->isChecked() && !ui->playButton->isChecked())
        drawMatToView(receivedMat);
-    }
 
     if (!ui->checkBoxContinuous->isChecked()) {
         ui->pushButtonRun->setEnabled(true);
@@ -298,11 +296,10 @@ void MainWindow::on_pushButtonWebcam_clicked()
     outputTensor.clear();
     ui->labelInference->setText(inferenceTimeLabel);
     fpsTimer->start();
-    if (ui->pushButtonWebcam->isChecked()) {
+    if (ui->pushButtonWebcam->isChecked())
         QMetaObject::invokeMethod(cvWorker, "readFrame");
-    } else {
+    else
         webcamTimer->stop();
-    }
 }
 
 void MainWindow::showImage(const cv::Mat& matToShow)
@@ -499,11 +496,10 @@ cv::Mat MainWindow::resizeKeepAspectRatio(const cv::Mat& matInput)
     double height = ui->graphicsView->width() * (matInput.rows/(double)matInput.cols);
     double width = (ui->graphicsView->height() - HEIGHT_OFFSET) * (matInput.cols/(double)matInput.rows);
 
-    if( height <= (ui->graphicsView->height() - HEIGHT_OFFSET)) {
+    if( height <= (ui->graphicsView->height() - HEIGHT_OFFSET))
         cv::resize(matInput, matOutput, cv::Size(ui->graphicsView->width(), height));
-    } else {
+    else
         cv::resize(matInput, matOutput, cv::Size(width, (ui->graphicsView->height() - HEIGHT_OFFSET)));
-    }
 
     return matOutput;
 }

@@ -31,11 +31,8 @@ void opencvWorker::initialiseWebcam(QString cameraLocation)
             " ! videoconvert ! appsink";
         videoCapture.reset(new cv::VideoCapture(gstreamerPipeline.toStdString(), \
                                                 cv::CAP_GSTREAMER));
-        if (videoCapture->isOpened()) {
-            webcamInitialised = true;
-        } else {
-            webcamInitialised = false;
-        }
+
+        webcamInitialised = videoCapture->isOpened();
     } else {
         webcamInitialised = false;
     }
