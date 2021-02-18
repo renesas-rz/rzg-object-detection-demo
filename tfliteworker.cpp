@@ -66,6 +66,11 @@ void tfliteWorker::receiveImage(const cv::Mat& sentMat)
     int timeElapsed;
     int input = tfliteInterpreter->inputs()[0];
 
+    if(sentMat.empty()) {
+        qWarning("Received invalid image path, cannot run inference");
+        return;
+    }
+
     cv::resize(sentMat, sentImageMat, cv::Size(wantedHeight,wantedWidth));
     cv::cvtColor(sentImageMat, sentImageMat, cv::COLOR_BGR2RGB);
 
