@@ -458,7 +458,7 @@ void MainWindow::on_stopButton_clicked()
     videoTimer->stop();
     videoLoaded = false;
     cap.set(cv::CAP_PROP_POS_FRAMES, 0);
-    getVideoFileFrame();
+
     ui->playButton->setChecked(false);
     ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
     scene->clear();
