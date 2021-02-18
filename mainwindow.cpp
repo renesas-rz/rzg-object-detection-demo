@@ -297,6 +297,7 @@ void MainWindow::on_pushButtonWebcam_clicked()
     outputTensor.clear();
     ui->labelInference->setText(inferenceTimeLabel);
     fpsTimer->start();
+    ui->pushButtonCapture->setEnabled(true);
 
     if (ui->pushButtonWebcam->isChecked())
         QMetaObject::invokeMethod(cvWorker, "readFrame");
@@ -388,7 +389,6 @@ void MainWindow::webcamInitStatus(bool webcamStatus)
         ui->labelCamera->setText(cameraStatusLabel + QString("Disconnected"));
     } else {
         ui->pushButtonWebcam->setEnabled(true);
-        ui->pushButtonCapture->setEnabled(true);
         QMetaObject::invokeMethod(cvWorker, "readFrame");
         webcamTimer->setInterval(1000);
         webcamTimer->setSingleShot(true);
