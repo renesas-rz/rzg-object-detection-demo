@@ -125,7 +125,6 @@ void MainWindow::on_pushButtonFile_clicked()
 {
     qeventLoop = new QEventLoop;
     QString fileName;
-    QStringList fileNames;
     QFileDialog dialog(this);
     QString fileFilter;
     QString fileNameFull;
@@ -136,7 +135,7 @@ void MainWindow::on_pushButtonFile_clicked()
     ui->pushButtonWebcam->setChecked(false);
     outputTensor.clear();
     ui->labelInference->setText(inferenceTimeLabel);
-    dialog.setFileMode(QFileDialog::AnyFile);
+    dialog.setFileMode(QFileDialog::ExistingFile);
 
     fileFilter = "Images (*.bmp *.dib *.jpeg *.jpg *.jpe *.png *.pbm *.pgm *.ppm *.sr *.ras *.tiff *.tif);;";
     fileFilter += "Videos (*.asf *.avi *.3gp *.mp4 *m4v *.mov *.flv *.mpeg *.mkv *.webm *.mxf *.ogg)";
@@ -144,14 +143,16 @@ void MainWindow::on_pushButtonFile_clicked()
     dialog.setNameFilter(fileFilter);
     dialog.setViewMode(QFileDialog::Detail);
 
-    if (dialog.exec())
-        fileNames = dialog.selectedFiles();
-
-    if(fileNames.count() > 0)
-        fileName = fileNames.at(0);
+    if(dialog.exec()) {
+        fileName = dialog.selectedFiles().at(0);
+    } else {
+        qeventLoop->exec();
+        return;
+    }
 
     if (QFile::exists(fileName)) {
         fileNameFull = QDir::current().absoluteFilePath(fileName);
+
         if (dialog.selectedNameFilter().contains("Images")) {
             matToSend = cv::imread(fileNameFull.toStdString());
             drawMatToView(matToSend);
@@ -168,6 +169,7 @@ void MainWindow::on_pushButtonFile_clicked()
             cap = cv::VideoCapture(fileNameFull.toStdString());
             videoLoaded = false;
             imageLoaded = false;
+
             getVideoFileFrame();
             ui->checkBoxContinuous->setEnabled(true);
             ui->playButton->setVisible(true);
@@ -177,9 +179,6 @@ void MainWindow::on_pushButtonFile_clicked()
             fpsTimer->start();
             videoContinuousTimer->start();
         }
-    }
-    else {
-        QMessageBox::warning(this, "Warning", "File does not exist.");
     }
 
     emit fileLoaded();
