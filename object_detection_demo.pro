@@ -1,5 +1,5 @@
 #*****************************************************************************************
-# Copyright (C) 2020 Renesas Electronics Corp.
+# Copyright (C) 2021 Renesas Electronics Corp.
 # This file is part of the RZG Object Detection Demo.
 #
 # The RZG Object Detection Demo is free software using the Qt Open Source Model: you can redistribute it and/or modify
