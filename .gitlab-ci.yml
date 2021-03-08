@@ -24,6 +24,9 @@ stages:
     paths:
       - object_detection_demo
 
+hihope-rzg2h_object-detection:
+  extends: .app-build
+
 hihope-rzg2m_object-detection:
   extends: .app-build
 
